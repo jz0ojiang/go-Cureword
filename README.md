@@ -1,6 +1,6 @@
 # Go-Cureword
 
-![Cureword](https://img.shields.io/badge/Cureword-fe8000?style=flat&logo=Go) ![LICENSE](https://img.shields.io/badge/License-AGPL--3.0_License-yellow?style=flat) ![version](https://img.shields.io/badge/Version-0.1.0_R-blueviolet?style=flat) ![visit time](https://visitor-badge.glitch.me/badge?page_id=github-com-0ojixueseno0-go_cureword)
+![Cureword](https://img.shields.io/badge/Cureword-fe8000?style=flat&logo=Go) ![LICENSE](https://img.shields.io/badge/License-AGPL--3.0_License-yellow?style=flat) ![version](https://img.shields.io/badge/Version-0.1.1_R-blueviolet?style=flat) ![visit time](https://visitor-badge.glitch.me/badge?page_id=github-com-0ojixueseno0-go_cureword)
 
 ## What do I use
 
