@@ -55,9 +55,15 @@ func posttest(writer http.ResponseWriter, request *http.Request) {
 }
 
 func IndexHandler(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
+	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	writer.Header().Set("content-type", "application/json")
 	fmt.Fprintln(writer, mods.Rerrors[4])
 }
 func CWAPI(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
+	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	writer.Header().Set("content-type", "application/json")
 	query := request.URL.Query()
 	value, appid, secret := query.Get("value"), query.Get("appid"), query.Get("secret")
 	if value == "" || appid == "" || secret == "" { //判断是否传入了需要的值
