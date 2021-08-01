@@ -1,3 +1,4 @@
 go-cureword*
 logs/
 Appdata*
+*.go-old

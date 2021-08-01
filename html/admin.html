@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cureword Admin Board</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <el-row>
+        <el-col :span="4"><br /></el-col>
+        <el-col :span="16">
+          <el-card>
+            <h1>Cureword Admin-Board</h1>
+            <el-divider></el-divider>
+            <el-card>
+              <el-table
+                ref="multipleTable"
+                :data="nwords"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @selection-change="handleSelectionChange"
+              >
+                <el-table-column type="selection"> </el-table-column>
+                <el-table-column label="ID" prop="id"> </el-table-column>
+                <el-table-column prop="word" label="内容"> </el-table-column>
+                <el-table-column prop="email" label="联系方式">
+                </el-table-column>
+              </el-table>
+              <el-divider></el-divider>
+              <el-form
+                :model="ruleForm"
+                :rules="rules"
+                ref="ruleForm"
+                label-width="220px"
+                status-icon
+                label-position="left"
+                >
+                <el-form-item
+                  label="Admin Account"
+                  prop="account"
+                >
+                  <el-input
+                    v-model="ruleForm.account"
+                    style="width: 400px"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item
+                  label="Google 身份验证器 动态口令"
+                  prop="accessToken"
+                >
+                  <el-input
+                    v-model.number="ruleForm.accessToken"
+                    style="width: 400px"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="success" @click="submitForm('ruleForm','accept')">通过</el-button>
+                  <el-button type="danger" @click="submitForm('ruleForm','refuse')">删除</el-button>
+                  <el-button @click="resetForm('ruleForm')">重置</el-button>
+                </el-form-item>
+              </el-form>
+            </el-card>
+          </el-card>
+        </el-col>
+        <el-col :span="4"><br /></el-col>
+      </el-row>
+    </div>
+  </body>
+  <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <!-- 生产环境版本，优化了尺寸和速度 -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script>
+    new Vue({
+      el: "#app",
+      data: function () {
+        var checkToken = (rule, value, callback) => {
+          if (!value) {
+            return callback(new Error("口令不能为空"));
+          }
+          setTimeout(() => {
+            if (!Number.isInteger(value)) {
+              callback(new Error("请输入数字值"));
+            } else {
+              callback();
+            }
+          }, 1000);
+        };
+        return {
+          nwords: [
+            { id: 1, word: "this is a word", email: "someone@qq.com" },
+            { id: 2, word: "this is another word", email: "" },
+            {
+              id: 3,
+              word: "this is a word a very loooooo0o0o0o0o0o0o0o0o0o0o0o0o0oong word...",
+              email: "someone@qq.com",
+            },
+          ],
+          ruleForm: {
+            selects: [],
+            account: '',
+            accessToken: '',
+          },
+          rules: {
+            account: [{ required: true, message: '请输入Admin Account', trigger: 'blur' },],
+            accessToken: [{ required: true, validator: checkToken, trigger: "blur" }]
+          },
+        };
+      },
+      methods: {
+        handleSelectionChange(val) {
+          this.ruleForm.selects = val;
+          console.log(this.ruleForm.selects);
+        },
+        submitForm(formName,type) {
+          this.$refs[formName].validate((valid) => {
+            if (this.ruleForm.selects.length == 0) {
+              this.$message.error('请选择你要操作的语句');
+              return false;
+            }
+            if (valid) {
+              alert('submit!'); // TODO: POST to app
+            } else {
+              console.log('error submit!!');
+              return false;
+            }
+          });
+        },
+        resetForm(formName) {
+          this.$refs.multipleTable.clearSelection();
+          this.$refs[formName].resetFields();
+        }
+      },
+    });
+  </script>
+</html>
