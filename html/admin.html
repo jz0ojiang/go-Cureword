@@ -9,15 +9,32 @@
       rel="stylesheet"
       href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
     />
-    <link rel="stylesheet" href="style.css" />
+    <style>
+      .input-box{
+          width: 400px
+        }
+      @media screen and (max-width: 840px) {
+        .input-box{
+          width: 300px
+        }
+      }
+      @media screen and (max-width: 660px) {
+        .input-box{
+          width: 200px
+        }
+      }
+
+      
+    </style>
   </head>
   <body>
     <div id="app">
-      <el-row>
-        <el-col :span="4"><br /></el-col>
-        <el-col :span="16">
+      <el-row :gutter="10">
+        <el-col :xs="1" :sm="2" :md="3" :lg="4" :xl="4"><br /></el-col>
+        <el-col :xs="22" :sm="20" :md="18" :lg="16" :xl="16">
           <el-card>
             <h1>Cureword Admin-Board</h1>
+            <span>声明：以下内容为网友提交 如有违规内容将及时删除并且不会出现在主站中</span>
             <el-divider></el-divider>
             <el-card>
               <el-table
@@ -29,8 +46,10 @@
               >
                 <el-table-column type="selection"> </el-table-column>
                 <el-table-column label="ID" prop="id"> </el-table-column>
-                <el-table-column prop="word" label="内容"> </el-table-column>
-                <el-table-column prop="email" label="联系方式">
+                <el-table-column prop="content" label="内容"> </el-table-column>
+                <el-table-column prop="contact" label="联系方式">
+                </el-table-column>
+                <el-table-column prop="time" label="提交时间">
                 </el-table-column>
               </el-table>
               <el-divider></el-divider>
@@ -40,7 +59,7 @@
                 ref="ruleForm"
                 label-width="220px"
                 status-icon
-                label-position="left"
+                :label-position="labelPosition"
                 >
                 <el-form-item
                   label="Admin Account"
@@ -48,7 +67,7 @@
                 >
                   <el-input
                     v-model="ruleForm.account"
-                    style="width: 400px"
+                    class="input-box"
                   ></el-input>
                 </el-form-item>
                 <el-form-item
@@ -56,8 +75,8 @@
                   prop="accessToken"
                 >
                   <el-input
-                    v-model.number="ruleForm.accessToken"
-                    style="width: 400px"
+                    v-model="ruleForm.accessToken"
+                    class="input-box"
                   ></el-input>
                 </el-form-item>
                 <el-form-item>
@@ -69,7 +88,8 @@
             </el-card>
           </el-card>
         </el-col>
-        <el-col :span="4"><br /></el-col>
+        <!-- <el-col :span="4"><br /></el-col> -->
+        <el-col :xs="1" :sm="2" :md="3" :lg="4" :xl="4"><br /></el-col>
       </el-row>
     </div>
   </body>
@@ -79,65 +99,105 @@
   <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
   <!-- 引入组件库 -->
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- <script src="https://s3.pstatp.com/cdn/expire-1-M/jquery/3.3.1/jquery.min.js"></script> -->
+
   <script>
     new Vue({
       el: "#app",
       data: function () {
-        var checkToken = (rule, value, callback) => {
-          if (!value) {
-            return callback(new Error("口令不能为空"));
-          }
-          setTimeout(() => {
-            if (!Number.isInteger(value)) {
-              callback(new Error("请输入数字值"));
-            } else {
-              callback();
-            }
-          }, 1000);
-        };
+        let w = document.documentElement.offsetWidth || document.body.offsetWidth;
+        if (w <= 660) {
+          this.labelPosition = "top"
+        } else {
+          this.labelPosition = "right"
+        }
         return {
-          nwords: [
-            { id: 1, word: "this is a word", email: "someone@qq.com" },
-            { id: 2, word: "this is another word", email: "" },
-            {
-              id: 3,
-              word: "this is a word a very loooooo0o0o0o0o0o0o0o0o0o0o0o0o0oong word...",
-              email: "someone@qq.com",
-            },
-          ],
+          nwords: [],
           ruleForm: {
+            type: '',
             selects: [],
             account: '',
             accessToken: '',
           },
           rules: {
             account: [{ required: true, message: '请输入Admin Account', trigger: 'blur' },],
-            accessToken: [{ required: true, validator: checkToken, trigger: "blur" }]
+            accessToken: [{ required: true, trigger: "blur" }]
           },
         };
+      },
+      mounted () {
+        // this.$http.get("/app?value=get")
+        axios
+          .get("/app?value=get")
+          .then(response => {
+            // this.$set(this.nwords, 'data', response.body)
+            this.nwords = response.data.data
+          })
+          .catch(error => {
+            console.log(error)
+            this.errored = true
+          })
       },
       methods: {
         handleSelectionChange(val) {
           this.ruleForm.selects = val;
           console.log(this.ruleForm.selects);
         },
-        submitForm(formName,type) {
+        submitForm(formName, type) {
           this.$refs[formName].validate((valid) => {
             if (this.ruleForm.selects.length == 0) {
               this.$message.error('请选择你要操作的语句');
               return false;
             }
+            this.ruleForm.type = type
             if (valid) {
-              alert('submit!'); // TODO: POST to app
+              axios({
+                method: 'post',
+                url: '/app?value=submit',
+                data: JSON.stringify(this.ruleForm),
+                headers: {'Content-Type': 'application/json'}
+              })
+              .then((response) => {
+                console.log(response.body)
+                if (response.status == 200 && response.data.code == 200) {
+                  console.log("success");
+                  this.$message.success("成功提交数据");
+                } else {
+                  console.log(response.data.info);
+                  this.$message({
+                    type: 'error',
+                    dangerouslyUseHTMLString: true,
+                    message: `提交数据失败<br />错误代码:${response.data.code}<br />错误信息:${response.data.info}`
+                  });
+                }
+              })
+              .catch(function(error){
+                console.log(error)
+              })
+              console.log(this.ruleForm);
             } else {
               console.log('error submit!!');
               return false;
             }
+            setTimeout(this.regetForm, 1000);
           });
         },
         resetForm(formName) {
+          setTimeout(this.regetForm, 1000);
           this.$refs.multipleTable.clearSelection();
           this.$refs[formName].resetFields();
+        },
+        regetForm() {
+          axios
+          .get("/app?value=get")
+          .then(response => {
+            this.nwords = response.data.data
+          })
+          .catch(error => {
+            console.log(error)
+            this.errored = true
+          })
         }
       },
     });

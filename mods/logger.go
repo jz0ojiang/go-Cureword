@@ -26,7 +26,7 @@ func Linklog() {
 		}
 	}
 	LogFile = file
-	Loger = log.New(LogFile, "[CW]", log.LstdFlags|log.Lshortfile|log.LUTC)
+	Loger = log.New(LogFile, "[CureW-API]", log.LstdFlags|log.Lshortfile|log.LUTC)
 }
 
 func Log(msg string) {

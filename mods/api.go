@@ -13,6 +13,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const API_HOST = "api.cureword.top:256"
+
 var sampleWords = [...]string{
 	"哪怕是示例鸡汤，也是那么的美丽",
 	"就算世界毁灭，我也是一条毒鸡汤",
@@ -40,7 +42,6 @@ type words struct {
 func initAPI() {
 	// 连接日志文件
 	Linklog()
-	defer LogFile.Close()
 	// 每日重置API数量
 	count := cron.New()
 	count.AddFunc("0 0 4 * * *", ResetCount)
@@ -48,19 +49,19 @@ func initAPI() {
 }
 
 func readSettings() configguration {
-	config, err := yaml.ReadFile("conf.yaml")
+	config, err := yaml.ReadFile("config.yml")
 	if err != nil {
-		fmt.Println("读取config.yml时出错 将使用默认配置")
+		Log("读取config.yml时出错 将使用默认配置")
 		return configguration{host: "0.0.0.0", port: 256}
 	}
 	host, err := config.Get("host")
 	if err != nil {
-		fmt.Println("读取config.yml时出错 将使用默认配置")
+		Log("读取config.yml时出错 将使用默认配置")
 		return configguration{host: "0.0.0.0", port: 256}
 	}
 	port, err := config.GetInt("port")
 	if err != nil {
-		fmt.Println("读取config.yml时出错 将使用默认配置")
+		Log("读取config.yml时出错 将使用默认配置")
 		return configguration{host: "0.0.0.0", port: 256}
 	}
 	return configguration{host: host, port: port}
@@ -77,6 +78,7 @@ func dataOperation(value string) ResponseJson {
 	case "getlast":
 		word, err := GetNewest()
 		if err != nil {
+			Log("Error:" + err.Error())
 			return ResponseJson{
 				Code: ERROR_DATABASE,
 				Info: GetErrMsg(ERROR_DATABASE),
@@ -93,6 +95,7 @@ func dataOperation(value string) ResponseJson {
 	case "randget":
 		word, err := RandomGet()
 		if err != nil {
+			Log("Error:" + err.Error())
 			return ResponseJson{
 				Code: ERROR_DATABASE,
 				Info: GetErrMsg(ERROR_DATABASE),
@@ -109,6 +112,7 @@ func dataOperation(value string) ResponseJson {
 	case "getword":
 		word, err := GetWords()
 		if err != nil {
+			Log("Error:" + err.Error())
 			return ResponseJson{
 				Code: ERROR_DATABASE,
 				Info: GetErrMsg(ERROR_DATABASE),
@@ -137,7 +141,7 @@ func usecountOver(user User) bool {
 	return (user.Usecount >= 300 && user.Perm == 1) || (user.Usecount >= 500 && user.Perm == 2)
 }
 
-func apiTask(query url.Values) []byte {
+func apiTask(query url.Values, url string) []byte {
 	var result ResponseJson
 	value, appid, secret := query.Get("value"), query.Get("appid"), query.Get("secret")
 	if len(value+appid+secret) == 0 {
@@ -179,7 +183,13 @@ func apiTask(query url.Values) []byte {
 					result.Data = struct{}{}
 				} else {
 					AddCount(appid)
-					result = dataOperation(value)
+					if appid == "web" && url != API_HOST {
+						result.Code = ERROR_VERIFY_FAIL
+						result.Info = GetErrMsg(ERROR_VERIFY_FAIL)
+						result.Data = struct{}{}
+					} else {
+						result = dataOperation(value)
+					}
 				}
 			}
 		} else {
@@ -189,44 +199,41 @@ func apiTask(query url.Values) []byte {
 		}
 	}
 	bytes, _ := json.Marshal(result)
-	println(string(bytes[:]))
 	return bytes
 }
 
-func index(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
-	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
-	writer.Header().Set("content-type", "application/json")
-	writer.Write([]byte(""))
-}
 func api(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
-	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	writer.Header().Set("Access-Control-Allow-Methods", "GET")
 	writer.Header().Set("content-type", "application/json")
 	query := request.URL.Query()
-	// fmt.Fprintf(writer, apiTask(query))
-	writer.Write(apiTask(query))
+	writer.Write(apiTask(query, request.Host))
 }
 
 // 管理面板
 func admin(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
-	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	writer.Header().Set("Access-Control-Allow-Methods", "GET")
 	http.ServeFile(writer, request, "./html/admin.html")
 }
 
 // 运行API服务
 func Run(c *cli.Context) error {
 	initAPI()
+	defer LogFile.Close()
 	settings := readSettings()
 	fmt.Println("Cureword-API serve will start in 5 seconds (press Ctrl+C to Cancel)")
 	time.Sleep(5 * time.Second)
 	host := fmt.Sprintf("%s:%d", settings.host, settings.port)
-	fmt.Printf("Cureword-API will run in %s:%d\n", settings.host, settings.port)
+	Log(fmt.Sprintf("Cureword-API will run in %s:%d\n", settings.host, settings.port))
+
 	// 绑定函数
-	http.HandleFunc("/", index)
+	http.Handle("/", http.FileServer(http.Dir("./doc")))
 	http.HandleFunc("/api", api)
+	http.HandleFunc("/app", App)
 	http.HandleFunc("/admin", admin)
+	http.HandleFunc("/submit", Submit)
+
 	err := http.ListenAndServe(host, nil)
 	return err
 }

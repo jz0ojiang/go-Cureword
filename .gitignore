@@ -2,3 +2,9 @@ go-cureword*
 logs/
 Appdata*
 *.go-old
+.vscode/
+.VS*/
+apidoc.json
+errorno.md
+header.md
+doc/

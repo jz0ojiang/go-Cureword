@@ -71,8 +71,8 @@ func AddAccount(c *cli.Context) error {
 		return errors.New("该Appid已经存在 请重新键入一个新的Appid")
 	}
 	result := mods.DB.Create(&user)
-	fmt.Println(result.Error == nil)
-	return nil
+	// fmt.Println(result.Error == nil)
+	return result.Error
 }
 
 func ListAccount(c *cli.Context) error {
@@ -97,6 +97,7 @@ func DeleteAccount(c *cli.Context) error {
 		user.Appid = c.Args().Get(0)
 		if mods.AccountIsExist(user.Appid) {
 			if input("输入('ConfirmDelete')确认删除账号:") == "ConfirmDelete" {
+				fmt.Println("account deleted")
 				mods.DB.Where("appid = ?", user.Appid).Delete(&user)
 				return nil
 			} else {

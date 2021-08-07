@@ -12,6 +12,11 @@ const (
 	ERROR_UNKNOWN      = 1006
 
 	ERROR_DATABASE = 2001
+
+	ERROR_POSTBODY = 3001
+
+	ERROR_SIMILARWORD   = 4001
+	ERROR_TEMPWORDSFULL = 4002
 )
 
 var errorMsg = map[int]string{
@@ -24,6 +29,10 @@ var errorMsg = map[int]string{
 	ERROR_USECOUNT:     "当日请求次数已达上限",
 	ERROR_UNKNOWN:      "未知错误",
 	ERROR_DATABASE:     "数据库连接出错",
+
+	ERROR_POSTBODY:      "Body解析出错",
+	ERROR_SIMILARWORD:   "提交参数与已有的太过相似",
+	ERROR_TEMPWORDSFULL: "已提交缓存过多",
 }
 
 func GetErrMsg(errno int) string {
