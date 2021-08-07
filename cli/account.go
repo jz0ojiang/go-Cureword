@@ -13,6 +13,12 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// permission:
+//   0. 示例权限 仅返回示例内容
+//   1. 仅允许randget/get1st         每日调用次数300次
+//   2. 允许randget/get1st/getword   每日调用次数500次
+//   3. 带有GoogleAuth的管理员账号
+
 func input(prompt string) string {
 	var text string
 	fmt.Print(prompt)

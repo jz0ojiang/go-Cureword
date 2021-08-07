@@ -13,8 +13,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const API_HOST = "api.cureword.top:256"
-
 var sampleWords = [...]string{
 	"哪怕是示例鸡汤，也是那么的美丽",
 	"就算世界毁灭，我也是一条毒鸡汤",
@@ -73,9 +71,16 @@ func userExist(appid string, secret string) bool {
 	return AccountIsExist(appid) && GetAccount(appid).Secret == secret
 }
 
-func dataOperation(value string) ResponseJson {
+func dataOperation(value string, user User) ResponseJson {
 	switch value {
 	case "getlast":
+		if user.Perm < 1 {
+			return ResponseJson{
+				Code: ERROR_PERMISSION,
+				Info: GetErrMsg(ERROR_PERMISSION),
+				Data: struct{}{},
+			}
+		}
 		word, err := GetNewest()
 		if err != nil {
 			Log("Error:" + err.Error())
@@ -93,6 +98,13 @@ func dataOperation(value string) ResponseJson {
 			Data: data,
 		}
 	case "randget":
+		if user.Perm < 1 {
+			return ResponseJson{
+				Code: ERROR_PERMISSION,
+				Info: GetErrMsg(ERROR_PERMISSION),
+				Data: struct{}{},
+			}
+		}
 		word, err := RandomGet()
 		if err != nil {
 			Log("Error:" + err.Error())
@@ -110,6 +122,13 @@ func dataOperation(value string) ResponseJson {
 			Data: data,
 		}
 	case "getword":
+		if user.Perm < 2 {
+			return ResponseJson{
+				Code: ERROR_PERMISSION,
+				Info: GetErrMsg(ERROR_PERMISSION),
+				Data: struct{}{},
+			}
+		}
 		word, err := GetWords()
 		if err != nil {
 			Log("Error:" + err.Error())
@@ -141,7 +160,7 @@ func usecountOver(user User) bool {
 	return (user.Usecount >= 300 && user.Perm == 1) || (user.Usecount >= 500 && user.Perm == 2)
 }
 
-func apiTask(query url.Values, url string) []byte {
+func apiTask(query url.Values) []byte {
 	var result ResponseJson
 	value, appid, secret := query.Get("value"), query.Get("appid"), query.Get("secret")
 	if len(value+appid+secret) == 0 {
@@ -177,19 +196,13 @@ func apiTask(query url.Values, url string) []byte {
 					result.Data = struct{}{}
 				}
 			} else {
-				if usecountOver(user) {
+				if usecountOver(user) && user.Appid != "web" {
 					result.Code = ERROR_USECOUNT
 					result.Info = GetErrMsg(ERROR_USECOUNT)
 					result.Data = struct{}{}
 				} else {
 					AddCount(appid)
-					if appid == "web" && url != API_HOST {
-						result.Code = ERROR_VERIFY_FAIL
-						result.Info = GetErrMsg(ERROR_VERIFY_FAIL)
-						result.Data = struct{}{}
-					} else {
-						result = dataOperation(value)
-					}
+					result = dataOperation(value, user)
 				}
 			}
 		} else {
@@ -207,7 +220,7 @@ func api(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Methods", "GET")
 	writer.Header().Set("content-type", "application/json")
 	query := request.URL.Query()
-	writer.Write(apiTask(query, request.Host))
+	writer.Write(apiTask(query))
 }
 
 // 管理面板

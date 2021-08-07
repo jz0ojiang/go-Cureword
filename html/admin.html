@@ -127,11 +127,9 @@
         };
       },
       mounted () {
-        // this.$http.get("/app?value=get")
         axios
           .get("/app?value=get")
           .then(response => {
-            // this.$set(this.nwords, 'data', response.body)
             this.nwords = response.data.data
           })
           .catch(error => {

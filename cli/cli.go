@@ -16,22 +16,6 @@ func Run() {
 	app.Usage = "API program for cureword.top"
 	app.Version = "0.2.0"
 
-	// Flags
-	app.Flags = []cli.Flag{
-		&cli.IntFlag{
-			Name:    "port",
-			Aliases: []string{"p"},
-			Value:   256,
-			Usage:   "listening port",
-		},
-		&cli.BoolFlag{
-			Name:    "faststart",
-			Aliases: []string{"fs"},
-			Value:   false,
-			Usage:   "Faststart Program",
-		},
-	}
-
 	//commands
 	app.Commands = []*cli.Command{
 		{

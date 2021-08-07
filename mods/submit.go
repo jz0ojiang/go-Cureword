@@ -71,7 +71,7 @@ func submitTask(request *http.Request) []byte {
 }
 
 func Submit(writer http.ResponseWriter, request *http.Request) {
-	// writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
+	writer.Header().Set("Access-Control-Allow-Origin", "http://www.cureword.top") //允许访问所有域
 	// writer.Header().Set("Access-Control-Allow-Headers", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "POST")
 	writer.Header().Set("content-type", "application/json")

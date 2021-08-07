@@ -1,105 +1,50 @@
 # Go-Cureword
 
-![Cureword](https://img.shields.io/badge/Cureword-fe8000?style=flat&logo=Go) ![LICENSE](https://img.shields.io/badge/License-AGPL--3.0_License-yellow?style=flat) ![version](https://img.shields.io/badge/Version-0.1.1_R-blueviolet?style=flat) ![visit time](https://visitor-badge.glitch.me/badge?page_id=github-com-0ojixueseno0-go_cureword)
+![Cureword](https://img.shields.io/badge/Cureword-a2b8a5?style=flat&logo=Go) ![LICENSE](https://img.shields.io/badge/License-AGPL--3.0_License-yellow?style=flat) ![version](https://img.shields.io/badge/Version-0.2.0_R-blueviolet?style=flat) ![visit time](https://visitor-badge.glitch.me/badge?page_id=github-com-0ojixueseno0-go_cureword) [![wakatime](https://wakatime.com/badge/github/0ojixueseno0/go-Cureword.svg)](https://wakatime.com/badge/github/0ojixueseno0/go-Cureword)
 
 ## What do I use
 
-- Go
-
-  cron
-
-  go-sqlite3
-
-  strsim
-
-
-- Sqlite3
+![Data From WakaTime](https://gitee.com/im0o/photobed/raw/master/img/20210807153739.png)
 
 
 ## Sqlite
 
-```
-File ::(Appdata.db)
-|| - Table
-|| -> main
-||    || -> id     integer
-||    || -> Word   text
-||
-|| -> token
-||    || -> id          integer
-||    || -> appid       text
-||    || -> secret      text
-||    || -> permission  integer
-||    || -> usecount    integer
-```
+![](https://gitee.com/im0o/photobed/raw/master/img/20210807153209.png)
 
 ## API
 
-```
-Getword - Get All words in database
-    useage: [GET/POST] host/api?value=getword&appid=#appid&secret=#secret
-    response body:
-      {
-        "status": "OK",
-        "info": "get all words",
-        "words": [
-            "这是一条例子",
-            "这是一条毒鸡汤(?)",
-            "这是一条鸡汤",
-            "这是示例中最新的句子"
-        ]
-      }
+API Doc: http://api.cureword.top:256
 
-Get1st - Get the latest word
-    useage: [GET/POST] host/api?value=get1st&appid=#appid&secret=#secret
-    response body:
-      {
-        "status": "OK",
-        "info": "get the latest word",
-        "words": "这是示例中最新的句子"
-      }
+## Cli
 
-RandomGet - random get a word
-    useage: [GET/POST] host/api?value=randget&appid=#appid&secret=#secret
-    response body:
-      {
-        "status": "OK",
-        "info": "random get a word",
-        "words": "这是一条毒鸡汤(?)"
-      }
-```
+Commands:
 
----
+```bash
+$ go-cureword
 
-```
-Upload - upload a word to database
-    useage: [POST] host/api?value=upload&appid=#appid&secret=#secret
-    request header:
-      Content-Type => application/x-www-form-urlencoded
-    request body:
-      word:#Cureword
-    response body:
-      {
-        "status": "OK",
-        "info": "uploaded to the database (admin will check it later)",
-        "word": "#Cureword"
-      }
+COMMANDS:
+   account  API account operations
+   run      Run API serve
+   help, h  Shows a list of commands or help for one command
 
-Delete - delete a word with id
-    useage: [POST] host/api?value=delete&appid=#appid&secret=#secret
-    request header:
-      Content-Type => application/x-www-form-urlencoded
-    request body:
-      id:#uid
-    response body:
-      {
-        "status": "OK",
-        "info": "Deleted data where id = #uid"
-	  }
+account:
+  COMMANDS:
+   add      add a new account
+   list     list all accounts
+   delete   delete an account
+   set      set an account
+   help, h  Shows a list of commands or help for one command
 
 ```
 
-### Permission
+## Config
+
+```yaml
+host: 0.0.0.0
+port: 256
+```
+
+## Permission
 
 > 0. Sample permissions only return sample content.
 >
@@ -107,26 +52,21 @@ Delete - delete a word with id
 >
 > 2. Allow randget/get1st/getword calls 500 times per day.
 >
-> 3. Allow POST upload calls 800 times per day.
->
-> 4. Allow POST delete unlimited number of calls
+> 3. Can use admin dashboard(with google_auth)
 
-### ErrorCode
+## Errorno
 
-```
+此处为反馈中所有可能出现的类型与错误代码
 
-  50000 - missing some data in url
-  50001 - sign verify failed
-  50002 - value error
-  50003 - overly similar strings
-  50005 - data dont have key 'word'
-  50006 - id does not exist(in data)
-  50007 - id does not exist(in database)
-  50008 - delete failed
-  50009 - unknown error
-  50010 - Permission Denied
-  50011 - api usage has reached the upper limit
-  50012 - Unknown token
-  50013 - Invalid Connect
+|        类型        | 错误代码 |             描述              |
+| :----------------: | :------: | :---------------------------: |
+|      SUCCESS       |   200    |           正常获取            |
+| ERROR_MISSING_DATA |   1001   |  缺失请求数据（检查你的url）  |
+| ERROR_VERIFY_FAIL  |   1002   |   验证失败，请检查你的密钥    |
+| ERROR_VALUE_ERROR  |   1003   | 请求方法异常，检查value内的值 |
+|  ERROR_PERMISSION  |   1004   |           权限不足            |
+|   ERROR_USECOUNT   |   1005   |     当日请求次数已达上限      |
+|   ERROR_UNKNOWN    |   1006   |           未知错误            |
+|   ERROR_DATABASE   |   2001   |        数据库连接出错         |
 
-```
+

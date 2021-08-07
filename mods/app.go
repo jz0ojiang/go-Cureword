@@ -104,7 +104,7 @@ func appTask(request *http.Request) []byte {
 
 // route:admin 接口
 func App(writer http.ResponseWriter, request *http.Request) {
-	// writer.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
+	writer.Header().Set("Access-Control-Allow-Origin", "http://www.cureword.top") //允许访问所有域
 	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
 	writer.Header().Set("content-type", "application/json")
 	writer.Write(appTask(request))
